@@ -23,13 +23,18 @@ WITH sales_summary AS (
         --------------------------------------------------
         -- CUSTOMER FACTS
         --------------------------------------------------
+        -- Standardized on first_purchase_date per KPI dictionary §6.1
+        -- (was previously acquisition_date, which is a marketing date,
+        -- not a purchase date — see audit P1.13). returning_customers is
+        -- defined as the complement of new_customers so the two always
+        -- sum to total_customers.
 
         COUNT(DISTINCT fs.customer_key)
             AS total_customers,
 
         COUNT(DISTINCT CASE
 
-            WHEN dc.acquisition_date = fs.date_key
+            WHEN dc.first_purchase_date = fs.date_key
 
             THEN fs.customer_key
 
@@ -37,7 +42,7 @@ WITH sales_summary AS (
 
         COUNT(DISTINCT CASE
 
-            WHEN dc.acquisition_date < fs.date_key
+            WHEN dc.first_purchase_date != fs.date_key
 
             THEN fs.customer_key
 
@@ -46,14 +51,17 @@ WITH sales_summary AS (
         --------------------------------------------------
         -- SALES FACTS
         --------------------------------------------------
+        -- Refunded orders are excluded from revenue and profit — see
+        -- audit P1.10. is_refunded is derived in fact_sales from
+        -- refund_status = 'refunded'.
 
         COUNT(DISTINCT fs.order_id)
             AS total_orders,
 
-        SUM(fs.net_sales)
+        SUM(CASE WHEN NOT fs.is_refunded THEN fs.net_sales END)
             AS total_revenue,
 
-        SUM(fs.gross_profit)
+        SUM(CASE WHEN NOT fs.is_refunded THEN fs.gross_profit END)
             AS gross_profit
 
     FROM {{ ref('fact_sales') }} fs

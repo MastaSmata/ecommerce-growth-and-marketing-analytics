@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document is the single KPI reference for the **Growth & Marketing Analytics**.
+This document is the single KPI reference for the **Growth & Marketing Analytics Dashboard**.
 
 It defines:
 
@@ -84,11 +84,11 @@ Purpose:
 Important columns:
 
 - `date_key`
-- `year`
-- `month`
+- `year_value`
+- `month_number`
 - `month_name`
-- `month_start`
-- `quarter`
+- `month_start_date`
+- `quarter_number`
 
 Power BI should use `dim_date` as the model's marked Date Table.
 
@@ -216,6 +216,14 @@ Core fields:
 ### Primary Aggregate
 
 `agg_sales_daily`
+
+**Status: not yet built.** No aggregate at this grain currently exists —
+product-category reporting (`category` / `sub_category`) is not available
+in any of the six aggregates that are built, despite `dim_products`
+already carrying that data. Until this model is built, Domain 1
+reporting is served by `agg_growth_daily`, `agg_campaign_performance`,
+and `agg_channel_performance` instead, none of which break down by
+product category.
 
 ### Grain
 
@@ -355,19 +363,25 @@ cohort_month
 × region
 ```
 
-The table should also retain:
+This table is kept at segment grain — it does not retain `customer_key`.
+Customer-level cohort drill-down is out of scope for this table; adding it
+would multiply row count by roughly the customer count and is a separate
+decision if ever needed.
 
-```text
-customer_key
-```
-
-where required for customer-level validation and correct cohort analysis.
+**Year-boundary rule:** `months_since_acquisition` must never let
+`activity_month` cross into a different calendar year than `cohort_month`.
+A cohort starting in, say, February only ever reaches
+`months_since_acquisition = 10` (December of that same year), not 11 — it
+does not extend into January of the following year. Without this rule,
+once more than one year of cohorts exists, activity from a later year
+bleeds into an earlier year's cohort row and produces impossible-looking
+retention numbers (e.g. retention increasing after previously dropping to
+0%). This is enforced in the model, not just in Power BI.
 
 ---
 
 ## Required Columns
 
-- `customer_key`
 - `cohort_month`
 - `activity_month`
 - `months_since_acquisition`
@@ -468,7 +482,12 @@ where the implemented project requires the date dimension.
 ### Stored Facts
 
 - `total_customers`
-- `repeat_customers`
+- `customers_with_multiple_orders_in_month` — counts customers who placed
+  more than one order within the same reporting month/segment row. This
+  is NOT a cross-month repeat-buyer count (previously named
+  `repeat_customers`, which implied that) — a true repeat-purchase-rate
+  metric belongs in Power BI per §8's "Do NOT store as SQL KPIs" list
+  below.
 - `total_orders`
 - `total_revenue`
 
@@ -993,7 +1012,9 @@ month × campaign × channel × region
 cohort_month × activity_month × months_since_acquisition × region
 ```
 
-with customer-level activity retained where required for validation.
+Kept at segment grain (no `customer_key`). `months_since_acquisition` is
+capped so `activity_month` never crosses into a different calendar year
+than `cohort_month` — see §7 for why.
 
 ### `agg_customer_segment`
 

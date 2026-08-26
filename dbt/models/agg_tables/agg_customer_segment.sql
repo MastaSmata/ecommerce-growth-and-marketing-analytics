@@ -40,7 +40,8 @@ WITH customer_summary AS (
         COUNT(DISTINCT fs.order_id)
             AS total_orders,
 
-        SUM(fs.net_sales)
+        -- Refunded orders excluded from revenue 
+        SUM(CASE WHEN NOT fs.is_refunded THEN fs.net_sales END)
             AS total_revenue
 
     FROM {{ ref('fact_sales') }} fs
@@ -97,8 +98,9 @@ segment_summary AS (
 
         COUNT(*) AS total_customers,
 
+        
         COUNTIF(total_orders > 1)
-            AS repeat_customers,
+            AS customers_with_multiple_orders_in_month,
 
         --------------------------------------------------
         -- SALES
@@ -156,7 +158,7 @@ SELECT
 
     total_customers,
 
-    repeat_customers,
+    customers_with_multiple_orders_in_month,
 
     --------------------------------------------------
     -- SALES
@@ -167,26 +169,12 @@ SELECT
     total_revenue,
 
     --------------------------------------------------
-    -- KPI
-    --------------------------------------------------
-
-    ROUND(
-
-        SAFE_DIVIDE(
-
-            repeat_customers,
-
-            total_customers
-
-        ) * 100,
-
-        2
-
-    ) AS repeat_purchase_rate,
-
-    --------------------------------------------------
     -- AUDIT
     --------------------------------------------------
+    -- Note: repeat_purchase_rate is intentionally NOT stored here — it's
+    -- a non-additive ratio and the KPI dictionary lists it under "Do NOT
+    -- store as SQL KPIs" (see audit P1.15). Compute it in Power BI as
+    -- DAX: DIVIDE(SUM(customers_with_multiple_orders_in_month), SUM(total_customers)).
 
     CURRENT_TIMESTAMP()
 

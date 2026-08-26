@@ -45,10 +45,11 @@ WITH sales_summary AS (
 
         ) AS new_customers,
 
-        SUM(fs.net_sales)
+        -- Refunded orders excluded from revenue/profit — see audit P1.10
+        SUM(CASE WHEN NOT fs.is_refunded THEN fs.net_sales END)
             AS total_revenue,
 
-        SUM(fs.gross_profit)
+        SUM(CASE WHEN NOT fs.is_refunded THEN fs.gross_profit END)
             AS gross_profit
 
     FROM {{ ref('fact_sales') }} fs
