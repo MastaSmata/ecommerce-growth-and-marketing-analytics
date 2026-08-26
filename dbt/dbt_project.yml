@@ -1,0 +1,23 @@
+name: operations_dashboard
+version: '1.0'
+profile: operations_dashboard
+
+model-paths: ["models"]
+
+
+# The free version of Google CLoud Account does not permit increamental method for materialization
+
+models:
+  operations_dashboard:
+
+    stg_tables:
+      +materialized: view
+
+    dim_tables:
+      +materialized: table  # increamental method should be used instead (only works for paid google cloud accounts)
+
+    agg_tables:
+      +materialized: table
+    
+    facts_tables:
+      +materialized: table

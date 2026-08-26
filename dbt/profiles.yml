@@ -1,0 +1,15 @@
+operations_dashboard:
+  target: dev
+
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('BIGQUERY_PROJECT') }}"
+      dataset: "{{ env_var('BIGQUERY_DATASET') }}"
+      threads: 4
+      location: "{{ env_var('BIGQUERY_LOCATION') }}"
+      priority: interactive
+
+      
+      

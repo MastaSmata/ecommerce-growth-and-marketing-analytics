@@ -1,0 +1,33 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*.so
+
+# Virtual environment
+venv/
+env/
+
+# Environment variables
+.env
+
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# dbt file
+dbt/dbt_packages/
+dbt/target/
+.user.yml
+target/
+
+# etl_files
+etl/_pycache_/
+etl/create_watermark.py
+etl/etl.log
+
+.gitActions_setup.md
+
+
+*.log
+**/logs/

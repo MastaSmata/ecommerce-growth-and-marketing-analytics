@@ -1,0 +1,15 @@
+version: 2
+
+models:
+  - name: agg_customer_cohort
+    description: >
+      Monthly cohort retention. Denominator held at original cohort size.
+      months_since_acquisition is capped so activity_month never crosses
+      into a different calendar year than cohort_month — this is what
+      keeps the Power BI matrix from blending cohorts across year
+      boundaries once more than one year of data exists.
+    columns:
+      - name: retention_rate
+        tests:
+          - dbt_utils.expression_is_true:
+              expression: "BETWEEN 0 AND 100"

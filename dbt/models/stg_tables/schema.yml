@@ -1,0 +1,71 @@
+version: 2
+
+models:
+  - name: stg_customers
+    description: One row per customer, cleaned and standardized from raw_customers.
+    columns:
+      - name: customer_id
+        description: Natural key for a customer.
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_products
+    description: One row per product, cleaned and standardized from raw_products.
+    columns:
+      - name: product_id
+        description: Natural key for a product.
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_campaigns
+    description: One row per campaign, cleaned and standardized from raw_campaigns.
+    columns:
+      - name: campaign_id
+        description: Natural key for a campaign.
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_channels
+    description: One row per marketing channel, cleaned and standardized from raw_channels.
+    columns:
+      - name: channel_name
+        description: Natural key for a channel.
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_sales
+    description: >
+      One row per order line, deduplicated on order_id (keeping the most
+      recently ingested copy) to protect against WRITE_APPEND retries.
+    columns:
+      - name: order_id
+        description: Natural key for an order line.
+        tests:
+          - not_null
+          - unique
+      - name: quantity
+        tests:
+          - not_null
+      - name: refund_status
+        tests:
+          - not_null
+          - accepted_values:
+              values: ['refunded', 'completed']
+
+  - name: stg_marketing
+    description: >
+      One row per ad record, deduplicated on ads_id (keeping the most
+      recently ingested copy) to protect against WRITE_APPEND retries.
+    columns:
+      - name: ads_id
+        description: Natural key for an ad record.
+        tests:
+          - not_null
+          - unique
+      - name: ad_spend
+        tests:
+          - not_null

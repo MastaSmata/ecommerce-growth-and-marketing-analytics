@@ -1,0 +1,107 @@
+version: 2
+
+models:
+  - name: fact_sales
+    description: >
+      One row per order line. LEFT JOINed to all five dims and coalesced
+      to each one's "unknown" member (see audit P1.8, P1.17), so orphan
+      orders and unattributed (organic/direct) orders stay in the fact
+      instead of being dropped — the equal_rowcount test below confirms
+      no rows are lost relative to stg_sales.
+    columns:
+      - name: sales_key
+        description: Surrogate key, generated from order_id + product_id.
+        tests:
+          - not_null
+          - unique
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: customer_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_customers')
+              field: customer_key
+      - name: product_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_products')
+              field: product_key
+      - name: channel_key
+        description: Coalesced to dim_channels' unknown member for organic/direct orders or orphaned channel values.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_channels')
+              field: channel_key
+      - name: campaign_key
+        description: Coalesced to dim_campaigns' unknown member for orders with no campaign or an orphaned campaign_id.
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_campaigns')
+              field: campaign_key
+      - name: net_sales
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+    tests:
+      # Catches P1.8: now that FKs are coalesced to unknown members instead
+      # of INNER JOINed, this confirms no rows are actually being dropped.
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('stg_sales')
+
+      # Catches P1.11: confirms discount_amount is actually consistent with
+      # gross_sales and net_sales rather than assuming discount is a fraction.
+      - dbt_utils.expression_is_true:
+          expression: "ABS(gross_sales - discount_amount - net_sales) < 0.01"
+
+  - name: fact_marketing
+    description: >
+      One row per ad record. LEFT JOINed to all three dims and coalesced
+      to each one's "unknown" member (see audit P1.9), so orphaned ad
+      rows stay in the fact instead of being dropped — the equal_rowcount
+      test below confirms no rows are lost relative to stg_marketing.
+    columns:
+      - name: marketing_key
+        description: Surrogate key, generated from ads_id.
+        tests:
+          - not_null
+          - unique
+      - name: date_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_date')
+              field: date_key
+      - name: campaign_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_campaigns')
+              field: campaign_key
+      - name: channel_key
+        tests:
+          - not_null
+          - relationships:
+              to: ref('dim_channels')
+              field: channel_key
+      - name: ad_spend
+        tests:
+          - not_null
+          - dbt_utils.expression_is_true:
+              expression: ">= 0"
+
+    tests:
+      # Catches P1.9: ad_spend is the denominator of ROAS/CAC — this
+      # confirms no rows are dropped now that FKs are coalesced to
+      # unknown members instead of INNER JOINed.
+      - dbt_utils.equal_rowcount:
+          compare_model: ref('stg_marketing')

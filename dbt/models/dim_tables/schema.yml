@@ -1,0 +1,68 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: One row per customer, with lifecycle metrics derived from stg_sales.
+    columns:
+      - name: customer_key
+        description: Surrogate key, generated from customer_id.
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_products
+    description: One row per product.
+    columns:
+      - name: product_key
+        description: Surrogate key, generated from product_id.
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_campaigns
+    description: One row per campaign, joined to its resolved channel.
+    columns:
+      - name: campaign_key
+        description: Surrogate key, generated from campaign_id.
+        tests:
+          - not_null
+          - unique
+      - name: campaign_id
+        tests:
+          - not_null
+          - unique
+      - name: channel_key
+        description: FK to dim_channels. Nullable if the campaign's channel didn't match dim_channels.
+        tests:
+          - relationships:
+              to: ref('dim_channels')
+              field: channel_key
+
+  - name: dim_channels
+    description: One row per marketing channel.
+    columns:
+      - name: channel_key
+        description: Surrogate key, generated from channel_name.
+        tests:
+          - not_null
+          - unique
+      - name: channel_name
+        tests:
+          - not_null
+          - unique
+
+  - name: dim_date
+    description: Calendar dimension, 2020-01-01 through 2035-12-31.
+    columns:
+      - name: date_key
+        tests:
+          - not_null
+          - unique
