@@ -134,25 +134,25 @@ The dashboard is a  **modern, dark-themed analytical workspace designed for expl
 
 ### Dashboard Page 1 — Growth Performance Overview
 
-<img src="https://github.com/MastaSmata/ecommerce-marketing-performance-analytics/blob/main/dashboard/screenshots/page%201.png" width="100%" />
+<img src="https://github.com/MastaSmata/ecommerce-growth-and-marketing-analytics/blob/main/dashboard/screenshots/page%201.png" width="100%" />
 
 Provides a consolidated view of revenue growth, customer acquisition efficiency, order performance, and retention. The page is designed for monthly  review, helping leadership assess whether growth is being driven by efficient customer acquisition and repeat purchasing.
 
 ### Dashboard Page 2 — Channel & Campaign Performance
 
-<img src="https://github.com/MastaSmata/ecommerce-marketing-performance-analytics/blob/main/dashboard/screenshots/page%202.png" width="100%" />
+<img src="https://github.com/MastaSmata/ecommerce-growth-and-marketing-analytics/blob/main/dashboard/screenshots/page%202.png" width="100%" />
 
 Evaluates marketing spend, revenue, ROAS, campaign profitability, and acquisition efficiency across channels and campaigns. It helps growth and performance-marketing teams identify high-performing campaigns, investigate inefficient spend, and determine where marketing budget should be increased, reduced, or reallocated.
 
 ### Dashboard Page 3 — Customer Retention & Cohorts
 
-<img src="https://github.com/MastaSmata/ecommerce-marketing-performance-analytics/blob/main/dashboard/screenshots/page%203.png" width="100%" />
+<img src="https://github.com/MastaSmata/ecommerce-growth-and-marketing-analytics/blob/main/dashboard/screenshots/page%203.png" width="100%" />
 
 Analyzes customer retention, repeat purchasing, and cohort behavior over time. The page helps CRM teams determine whether newly acquired customers are developing into repeat customers and identify changes in retention performance across acquisition cohorts.
 
 ### Dashboard Page 4 — Customer Segmentation & Regional Analysis
 
-<img src="https://github.com/MastaSmata/ecommerce-marketing-performance-analytics/blob/main/dashboard/screenshots/page%204.png" width="100%" />
+<img src="https://github.com/MastaSmata/ecommerce-growth-and-marketing-analytics/blob/main/dashboard/screenshots/page%204.png" width="100%" />
 
 Examines customer value, purchasing behavior, customer segments, and regional revenue performance. It helps identify the customer groups and geographic markets contributing the most value, supporting targeted CRM strategies and prioritization of high-value customer segments.
 
@@ -177,7 +177,7 @@ The agreed requirements were then consolidated into a formal **Statement of Work
 
 The SOW served as the primary reference throughout development, ensuring that the technical implementation remained aligned with the original business requirements.
 
-📄 **[View the Full Scope of Work →](https://github.com/MastaSmata/ecommerce-marketing-performance-analytics/blob/main/docs/Scope_of_Work.docx)**
+📄 **[View the Full Scope of Work →](https://github.com/MastaSmata/ecommerce-growth-and-marketing-analytics/blob/main/docs/Scope_of_Work.docx)**
 
 The detailed SOW provides the complete specification of the project, including the agreed deliverables, analytical scope, KPI requirements, and implementation expectations.
 
@@ -193,7 +193,7 @@ Following the data assessment, a **KPI Dictionary** was developed to establish a
 
 This ensured that the final warehouse and reporting layer were built around **validated business requirements and measurable data**, rather than assumptions.
 
-📄 **[View the KPI Dictionary →](https://github.com/MastaSmata/ecommerce-marketing-performance-analytics/blob/main/docs/kpi_dictionary.md)**
+📄 **[View the KPI Dictionary →](https://github.com/MastaSmata/ecommerce-growth-and-marketing-analytics/blob/main/docs/kpi_dictionary.md)**
 
 ---
 
