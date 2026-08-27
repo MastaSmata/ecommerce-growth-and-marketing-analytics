@@ -24,6 +24,7 @@ target/
 # etl_files
 etl/_pycache_/
 etl/etl.log
+etl/sql/
 
 .gitActions_setup.md
 
