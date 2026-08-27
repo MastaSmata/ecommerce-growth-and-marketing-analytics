@@ -23,7 +23,6 @@ target/
 
 # etl_files
 etl/_pycache_/
-etl/create_watermark.py
 etl/etl.log
 
 .gitActions_setup.md
