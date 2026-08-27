@@ -234,20 +234,21 @@ This file is the central place where new datasets can be added to the pipeline.
 
 ---
 
-## 4. Raw table SQL definitions
+## 4. Raw table schema definitions
 
-The SQL files under [etl/sql/raw_tables](../etl/sql/raw_tables) define the destination table structures for the raw layer in BigQuery.
+The raw BigQuery tables are auto-created by `load_table_from_dataframe`
+based on the dataframe's dtypes — there's no explicit DDL executed
+anywhere in the pipeline. The single source of truth for expected raw
+column names and types is [etl/transform/schemas.py](../etl/transform/schemas.py),
+used both to coerce/validate incoming data and to know what each raw
+table should contain.
 
-These files are:
-
-- [etl/sql/raw_tables/raw_customers.sql](../etl/sql/raw_tables/raw_customers.sql)
-- [etl/sql/raw_tables/raw_sales.sql](../etl/sql/raw_tables/raw_sales.sql)
-- [etl/sql/raw_tables/raw_products.sql](../etl/sql/raw_tables/raw_products.sql)
-- [etl/sql/raw_tables/raw_marketing.sql](../etl/sql/raw_tables/raw_marketing.sql)
-- [etl/sql/raw_tables/raw_campaigns.sql](../etl/sql/raw_tables/raw_campaigns.sql)
-- [etl/sql/raw_tables/raw_channels.sql](../etl/sql/raw_tables/raw_channels.sql)
-
-They define the raw tables with primary keys and column definitions that reflect the expected structure of the incoming data. These SQL files are not invoked by the Python orchestrator directly, but they serve as the schema blueprints for the warehouse layer and are important for understanding what the ETL app is loading into BigQuery.
+(This project previously kept a parallel set of hand-written `CREATE
+TABLE` SQL files under `etl/sql/raw_tables/` describing the same
+tables. They were never executed by anything, had already drifted out
+of sync with `schemas.py` — e.g. missing `campaign_objective` and
+`_ingested_at` — and were removed rather than maintained as a second,
+competing definition of the same schema.)
 
 ---
 

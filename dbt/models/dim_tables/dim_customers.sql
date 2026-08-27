@@ -14,7 +14,11 @@ WITH customer_orders AS (
 
         COUNT(DISTINCT order_id) AS lifetime_orders,
 
-        SUM(revenue) AS lifetime_revenue
+        -- Refunded orders excluded from lifetime revenue for the same
+        -- reason as the aggregate tables (see audit P1.10) — this
+        -- dimension attribute wasn't covered by that original fix.
+        SUM(CASE WHEN refund_status != 'refunded' THEN revenue END)
+            AS lifetime_revenue
 
     FROM {{ ref('stg_sales') }}
 
@@ -122,7 +126,7 @@ LEFT JOIN customer_orders
 
 UNION ALL
 
--- Unknown customer member is used when a sales row's
+-- Unknown customer member (see audit P1.8) — used when a sales row's
 -- customer_id has no match in this dimension, so the order can still be
 -- joined and counted instead of silently dropped by an INNER JOIN.
 SELECT

@@ -29,7 +29,12 @@ def normalize_dataframe(df, schema):
                 )
 
             elif "VARCHAR" in dtype:
-                df[column] = df[column].astype(str)
+                # astype(str) turns NaN into the literal 4-character
+                # string "nan" (and None into "None") — those then show
+                # up as a real category in BigQuery/Power BI instead of
+                # a null. astype("string") is pandas' nullable string
+                # dtype and preserves actual nulls (see audit P1.5).
+                df[column] = df[column].astype("string")
 
         except Exception as e:
             print(f"Failed to normalize {column}: {e}")

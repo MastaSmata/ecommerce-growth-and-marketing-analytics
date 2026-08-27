@@ -139,10 +139,14 @@ SELECT
 
     --------------------------------------------------
     -- REPORTING DIMENSIONS
+    -- Coalesced so a channel/campaign/day with ad spend
+    -- but no sales still gets a row instead of disappearing.
     --------------------------------------------------
 
-    ss.date_key
-        AS report_date,
+    COALESCE(
+        ss.date_key,
+        ms.date_key
+    ) AS report_date,
 
     dch.channel_name,
 
@@ -152,27 +156,52 @@ SELECT
 
     dcmp.campaign_type,
 
-    ss.region,
+    -- Region only exists on the sales side (via dim_customers) — a
+    -- marketing-only row (spend with no sales) has no customer to
+    -- derive a region from, so it falls back to 'unknown' like other
+    -- unattributed dimension values.
+    COALESCE(
+        ss.region,
+        'unknown'
+    ) AS region,
 
     --------------------------------------------------
     -- CUSTOMER FACTS
     --------------------------------------------------
 
-    ss.total_customers,
+    COALESCE(
+        ss.total_customers,
+        0
+    ) AS total_customers,
 
-    ss.new_customers,
+    COALESCE(
+        ss.new_customers,
+        0
+    ) AS new_customers,
 
-    ss.returning_customers,
+    COALESCE(
+        ss.returning_customers,
+        0
+    ) AS returning_customers,
 
     --------------------------------------------------
     -- SALES FACTS
     --------------------------------------------------
 
-    ss.total_orders,
+    COALESCE(
+        ss.total_orders,
+        0
+    ) AS total_orders,
 
-    ss.total_revenue,
+    COALESCE(
+        ss.total_revenue,
+        0
+    ) AS total_revenue,
 
-    ss.gross_profit,
+    COALESCE(
+        ss.gross_profit,
+        0
+    ) AS gross_profit,
 
     --------------------------------------------------
     -- MARKETING FACTS
@@ -204,7 +233,11 @@ SELECT
 
 FROM sales_summary ss
 
-LEFT JOIN marketing_summary ms
+-- FULL OUTER JOIN (was LEFT JOIN): a channel/campaign/day with ad
+-- spend but zero sales previously had no row here at all — its spend
+-- just vanished from this table. See audit finding on marketing-only
+-- activity being dropped.
+FULL OUTER JOIN marketing_summary ms
 
     ON ss.date_key = ms.date_key
 
@@ -214,10 +247,14 @@ LEFT JOIN marketing_summary ms
 
 JOIN {{ ref('dim_channels') }} dch
 
-    ON ss.channel_key =
-       dch.channel_key
+    ON COALESCE(
+           ss.channel_key,
+           ms.channel_key
+       ) = dch.channel_key
 
 JOIN {{ ref('dim_campaigns') }} dcmp
 
-    ON ss.campaign_key =
-       dcmp.campaign_key
+    ON COALESCE(
+           ss.campaign_key,
+           ms.campaign_key
+       ) = dcmp.campaign_key

@@ -26,10 +26,15 @@ WITH deduped AS (
         TRIM(campaign_id) AS campaign_id,
 
         -- Incremental loads use WRITE_APPEND, so a retried or rerun batch
-        -- can insert the same order twice. Keep only the most recently
-        -- ingested copy of each order_id
+        -- can insert the same order line twice. Partitioned on
+        -- order_id + product_id to match fact_sales' actual grain (one
+        -- row per order LINE, not one row per order) — an order with
+        -- multiple products has multiple legitimate rows sharing one
+        -- order_id, and partitioning on order_id alone would silently
+        -- collapse them down to one. Keep only the most recently
+        -- ingested copy per line.
         ROW_NUMBER() OVER (
-            PARTITION BY TRIM(order_id)
+            PARTITION BY TRIM(order_id), TRIM(product_id)
             ORDER BY _ingested_at DESC
         ) AS _row_num
 

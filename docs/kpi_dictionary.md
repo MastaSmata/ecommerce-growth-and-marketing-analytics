@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-This document is the single KPI reference for the **Growth & Marketing Analytics Dashboard**.
+This document is the single KPI reference for the **Growth & Marketing Analytics Project**.
 
 It defines:
 
@@ -368,15 +368,21 @@ Customer-level cohort drill-down is out of scope for this table; adding it
 would multiply row count by roughly the customer count and is a separate
 decision if ever needed.
 
-**Year-boundary rule:** `months_since_acquisition` must never let
-`activity_month` cross into a different calendar year than `cohort_month`.
-A cohort starting in, say, February only ever reaches
-`months_since_acquisition = 10` (December of that same year), not 11 — it
-does not extend into January of the following year. Without this rule,
-once more than one year of cohorts exists, activity from a later year
-bleeds into an earlier year's cohort row and produces impossible-looking
-retention numbers (e.g. retention increasing after previously dropping to
-0%). This is enforced in the model, not just in Power BI.
+**Full 12-month window:** `months_since_acquisition` runs 0-11 for every
+cohort regardless of calendar year — a cohort starting in November
+correctly reaches `months_since_acquisition = 11` in October of the
+following year.
+
+**Power BI binding requirement:** because cohorts now cross calendar
+years, the report's "Cohort Month" field/axis MUST be bound to the
+actual `cohort_month` DATE value (which carries year), not a
+month-name-only or month-number-only field from a shared date table.
+Binding to month name/number alone will blend different years' cohorts
+under the same row label — e.g. January 2024's and January 2025's
+retention numbers combining into one "Jan" row — producing
+impossible-looking results (retention increasing after previously
+dropping to 0%). This is a report-layer requirement; the model itself
+cannot enforce it.
 
 ---
 
@@ -1012,9 +1018,9 @@ month × campaign × channel × region
 cohort_month × activity_month × months_since_acquisition × region
 ```
 
-Kept at segment grain (no `customer_key`). `months_since_acquisition` is
-capped so `activity_month` never crosses into a different calendar year
-than `cohort_month` — see §7 for why.
+Kept at segment grain (no `customer_key`). `months_since_acquisition`
+runs the full 0-11 window regardless of calendar year — see §7 for the
+Power BI binding requirement this creates.
 
 ### `agg_customer_segment`
 

@@ -82,17 +82,6 @@ customer_monthly_activity AS (
 
 ),
 
---------------------------------------------------
--- CUSTOMER ACTIVITY
--- months_since_acquisition is capped so
--- activity_month never crosses into a different
--- calendar year than cohort_month — otherwise a
--- cohort starting mid-year (e.g. Feb) bleeds into
--- Jan/Feb of the NEXT year at months_since_acquisition
--- 10/11, which corrupts the Power BI matrix once more
--- than one year of cohorts exists.
---------------------------------------------------
-
 customer_activity AS (
 
     SELECT
@@ -135,9 +124,6 @@ customer_activity AS (
             MONTH
 
         ) BETWEEN 0 AND 11
-
-        AND EXTRACT(YEAR FROM cma.activity_month) =
-            EXTRACT(YEAR FROM cc.cohort_month)
 
 ),
 
@@ -197,9 +183,17 @@ active_customers AS (
 
 --------------------------------------------------
 -- COMPLETE COHORT CALENDAR
--- Same year-boundary cap applied here as in
--- customer_activity, so the matrix only ever shows
--- columns that stay within the cohort's own year.
+-- Full 0-11 month window per cohort, regardless of
+-- calendar year. IMPORTANT: the Power BI report's
+-- "Cohort Month" field/axis must be bound to the
+-- actual cohort_month DATE value (which includes
+-- year), not a month-name-only or month-number-only
+-- field. Binding to month name/number alone will
+-- blend different years' cohorts together in the
+-- matrix once more than one year of data exists —
+-- that was the root cause of the original Power BI
+-- display bug, and it is a report-layer fix, not
+-- something this model can enforce.
 --------------------------------------------------
 
 cohort_calendar AS (
@@ -238,14 +232,6 @@ cohort_calendar AS (
             INTERVAL mi.month_number MONTH
 
         ) <= rm.latest_month
-
-        AND EXTRACT(YEAR FROM DATE_ADD(
-
-            cs.cohort_month,
-
-            INTERVAL mi.month_number MONTH
-
-        )) = EXTRACT(YEAR FROM cs.cohort_month)
 
 )
 
